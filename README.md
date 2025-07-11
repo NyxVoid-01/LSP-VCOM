@@ -1,8 +1,8 @@
-# LSP-AYNI
+# LSP-VCOM
 
 ## Descripción del Proyecto
 
-LSP-AYNI es un sistema de reconocimiento de lenguaje de señas Peruanas en tiempo real que utiliza un backend FastAPI con comunicación WebSocket, MediaPipe para extracción de puntos clave de manos, y TensorFlow para inferencia de aprendizaje automático. El sistema captura gestos de manos a través de webcam, extrae puntos clave y predice significados del lenguaje de señas.
+LSP-VCOM es un sistema de reconocimiento de lenguaje de señas Peruanas en tiempo real que utiliza un backend FastAPI con comunicación WebSocket, MediaPipe para extracción de puntos clave de manos, y TensorFlow para inferencia de aprendizaje automático. El sistema captura gestos de manos a través de webcam, extrae puntos clave y predice significados del lenguaje de señas.
 
 
 
