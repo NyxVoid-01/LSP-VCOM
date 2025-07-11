@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconocimiento de Lenguaje de Señas | LSP-AYNI</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-hands"></i>
+                    <span>LSP AYNI</span>
+                </div>
+                <div class="header-info">
+                    <div class="status-indicator" id="connectionStatus">
+                        <i class="fas fa-circle"></i>
+                        <span>Desconectado</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Demo Warning -->
+            <div class="alert alert-warning" id="demoWarning" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Modo Demostración</strong>
+                    <p>El modelo de IA no está disponible. Las predicciones son simuladas para demostración.</p>
+                </div>
+            </div>
+
+            <!-- Main Layout with Sidebar -->
+            <div class="main-layout">
+                <!-- Left Side: Video and Prediction -->
+                <div class="video-side">
+                    <!-- Video Section -->
+                    <section class="video-section">
+                        <div class="video-container">
+                            <video id="video" autoplay muted playsinline></video>
+                            <div class="video-overlay" id="videoOverlay">
+                                <div class="overlay-content">
+                                    <i class="fas fa-video camera-icon"></i>
+                                    <h3>Cámara Desactivada</h3>
+                                    <p>Haz clic en "Iniciar Cámara" para comenzar</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Guidance Message Overlay -->
+                            <div class="guidance-message-overlay" id="guidanceMessageOverlay" style="display: none;">
+                                <div class="guidance-content">
+                                    <i class="fas fa-hands guidance-icon"></i>
+                                    <h2 class="guidance-text" id="guidanceText">Muestra ambas manos frente a la cámara</h2>
+                                </div>
+                            </div>
+                            
+                            <!-- Countdown Overlay (over camera) -->
+                            <div class="countdown-camera-overlay" id="countdownCameraOverlay" style="display: none;">
+                                <div class="countdown-camera-content">
+                                    <div class="countdown-camera-number" id="countdownCameraNumber">3</div>
+                                    <div class="countdown-camera-message" id="countdownCameraMessage">Iniciando grabación en 3 segundos...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recording Icon -->
+                            <div class="recording-icon" id="recordingIcon" style="display: none;">
+                                <i class="fas fa-circle recording-dot"></i>
+                                <span class="recording-text">REC</span>
+                            </div>
+                            
+                            <!-- Pause Overlay -->
+                            <div class="pause-overlay" id="pauseOverlay" style="display: none;">
+                                <div class="pause-content">
+                                    <i class="fas fa-pause-circle pause-icon"></i>
+                                    <h3 class="pause-title">Predicción Completada</h3>
+                                    <div class="pause-timer" id="pauseTimer">2.0s</div>
+                                    <p class="pause-message">Preparándose para la siguiente detección...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="video-controls-overlay">
+                                <button class="control-btn" id="toggleFullscreen" title="Pantalla Completa">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Prediction Display Below Video -->
+                    <section class="prediction-display-section">
+                        <div class="current-prediction" id="currentPrediction" style="display: none;">
+                            <div class="prediction-header">
+                                <h3><i class="fas fa-brain"></i> Predicción Actual</h3>
+                            </div>
+                            <div class="prediction-result">
+                                <span class="prediction-text" id="predictionText">---</span>
+                                <div class="prediction-confidence-display">
+                                    <div class="confidence-bar-large">
+                                        <div class="confidence-fill-large" id="predictionConfidenceFill"></div>
+                                    </div>
+                                    <span class="confidence-percentage-large" id="predictionConfidenceText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Side: Controls and Settings -->
+                <div class="controls-side">
+                    <!-- Controls -->
+                    <section class="controls-section">
+                        <h3><i class="fas fa-gamepad"></i> Controles</h3>
+                        <div class="controls-grid">
+                            <button class="btn btn-primary" id="startBtn" onclick="startCamera()">
+                                <i class="fas fa-video"></i>
+                                <span>Iniciar Cámara</span>
+                            </button>
+                            <button class="btn btn-danger" id="stopBtn" onclick="stopCamera()" disabled>
+                                <i class="fas fa-stop"></i>
+                                <span>Detener</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearPredictions()">
+                                <i class="fas fa-broom"></i>
+                                <span>Limpiar Buffer</span>
+                            </button>
+                            <button class="btn btn-info" onclick="toggleSettings()">
+                                <i class="fas fa-cog"></i>
+                                <span>Configuración</span>
+                            </button>
+                            <button class="btn btn-upload" id="uploadBtn" onclick="uploadVideo()">
+                                <i class="fas fa-upload"></i>
+                                <span>Subir Video</span>
+                            </button>
+                            <input type="file" id="videoFileInput" accept="video/*" style="display: none;" onchange="handleVideoUpload(event)">
+                        </div>
+                    </section>
+
+                    <!-- Settings Panel -->
+                    <section class="settings-panel" id="settingsPanel" style="display: none;">
+                        <h3><i class="fas fa-cog"></i> Configuración</h3>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="confidenceThreshold">Umbral de Confianza</label>
+                                <input type="range" id="confidenceThreshold" min="0.1" max="1.0" step="0.1" value="0.6">
+                                <span class="setting-value" id="confidenceValue">0.6</span>
+                            </div>
+                            <div class="setting-item">
+                                <label for="predictionCount">Número de Predicciones</label>
+                                <select id="predictionCount">
+                                    <option value="3" selected>3</option>
+                                    <option value="5">5</option>
+                                    <option value="7">7</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="frameRate">Velocidad de Frame</label>
+                                <select id="frameRate">
+                                    <option value="100">10 FPS</option>
+                                    <option value="66">15 FPS</option>
+                                    <option value="50" selected>20 FPS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Stats -->
+                    <section class="stats-section">
+                        <h3><i class="fas fa-chart-line"></i> Estadísticas</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="predictionsCount">0</div>
+                                    <div class="stat-label">Predicciones</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="sessionTime">00:00</div>
+                                    <div class="stat-label">Tiempo</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Predictions and History Section -->
+            <section class="predictions-history-container">
+
+                <!-- Right Column: History -->
+                <div class="history-column">
+                    <div class="section-header">
+                        <h2><i class="fas fa-history"></i> Historial de Predicciones</h2>
+                        <button class="btn btn-ghost" onclick="clearHistory()">
+                            <i class="fas fa-trash"></i>
+                            Limpiar Historial
+                        </button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="history-placeholder">
+                            <div class="placeholder-content">
+                                <i class="fas fa-clock placeholder-icon"></i>
+                                <h3>Sin Historial</h3>
+                                <p>Las predicciones aparecerán aquí conforme las realices</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 AI LSP-AYNI - Reconocimiento de Lenguaje de Señas Peruana</p>
+                <div class="footer-links">
+                    <a href="#" onclick="showAbout()">Acerca de</a>
+                    <a href="#" onclick="showHelp()">Ayuda</a>
+                    <a href="/test" target="_blank">Estado del Servidor</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Cargando...</h3>
+            <p id="loadingMessage">Iniciando sistema de reconocimiento</p>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="aboutModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Acerca de LSP-AYNI</h3>
+                <button class="modal-close" onclick="closeModal('aboutModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Sistema de reconocimiento de lenguaje de señas en tiempo real utilizando inteligencia artificial.</p>
+                <ul>
+                    <li><strong>Tecnología:</strong> TensorFlow, MediaPipe, FastAPI</li>
+                    <li><strong>Detección:</strong> 47 señas diferentes</li>
+                    <li><strong>Precisión:</strong> Hasta 95% en condiciones óptimas</li>
+                    <li><strong>Tiempo Real:</strong> Predicciones a 15 FPS</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
