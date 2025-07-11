@@ -1,4 +1,4 @@
-# LSP-AYNI Backend
+# LSP-VCOM Backend
 
 Sistema de reconocimiento de lenguaje de señas Peruanas en tiempo real usando FastAPI, WebSocket y MediaPipe.
 
@@ -244,4 +244,5 @@ backend/
 
 **Versión**: 1.0.0  
 **Fecha**: Junio 2025  
-**Autor**: Sistema LSP-AYNI
+**Autor**: Sistema LSP-VCOM
+
